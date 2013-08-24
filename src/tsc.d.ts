@@ -329,6 +329,8 @@ declare module TypeScript {
         Option_mapRoot_cannot_be_specified_without_specifying_sourcemap_option: string;
         Option_sourceRoot_cannot_be_specified_without_specifying_sourcemap_option: string;
         Options_mapRoot_and_sourceRoot_cannot_be_specified_without_specifying_sourcemap_option: string;
+        Option_0_specified_without_1: string;
+        codepage_option_not_supported_on_current_platform: string;
         Concatenate_and_emit_output_to_single_file: string;
         Generates_corresponding_0_file: string;
         Specifies_the_location_where_debugger_should_locate_map_files_instead_of_generated_locations: string;
@@ -358,6 +360,8 @@ declare module TypeScript {
         VERSION: string;
         LOCATION: string;
         DIRECTORY: string;
+        NUMBER: string;
+        Specify_the_codepage_to_use_when_opening_source_files: string;
         This_version_of_the_Javascript_runtime_does_not_support_the_0_function: string;
         Looking_up_path_for_identifier_token_did_not_result_in_an_identifer: string;
         Unknown_rule: string;
@@ -529,7 +533,8 @@ declare class FileInformation {
     constructor(contents: string, byteOrderMark: ByteOrderMark);
 }
 interface IEnvironment {
-    readFile(path: string): FileInformation;
+    supportsCodePage(): boolean;
+    readFile(path: string, codepage: number): FileInformation;
     writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
     deleteFile(path: string): void;
     fileExists(path: string): boolean;
@@ -1916,7 +1921,15 @@ declare module TypeScript {
             "code": number;
             "category": DiagnosticCategory;
         };
-        "Concatenate and emit output to single file": {
+        "Option '{0}' specified without '{1}'": {
+            "code": number;
+            "category": DiagnosticCategory;
+        };
+        "'codepage' option not supported on current platform.": {
+            "code": number;
+            "category": DiagnosticCategory;
+        };
+        "Concatenate and emit output to single file.": {
             "code": number;
             "category": DiagnosticCategory;
         };
@@ -2029,6 +2042,14 @@ declare module TypeScript {
             "category": DiagnosticCategory;
         };
         "DIRECTORY": {
+            "code": number;
+            "category": DiagnosticCategory;
+        };
+        "NUMBER": {
+            "code": number;
+            "category": DiagnosticCategory;
+        };
+        "Specify the codepage to use when opening source files.": {
             "code": number;
             "category": DiagnosticCategory;
         };
@@ -6751,6 +6772,7 @@ declare module TypeScript {
         public useCaseSensitiveFileResolution: boolean;
         public gatherDiagnostics: boolean;
         public updateTC: boolean;
+        public codepage: number;
     }
     interface IPreProcessedFileInfo {
         settings: CompilationSettings;
@@ -7469,6 +7491,7 @@ declare module TypeScript {
         private genericASTResolutionStack;
         public resolvingTypeReference: boolean;
         public resolvingNamespaceMemberAccess: boolean;
+        public resolvingTypeQueryExpression: boolean;
         public resolveAggressively: boolean;
         public canUseTypeSymbol: boolean;
         public specializingToAny: boolean;
@@ -7621,6 +7644,7 @@ declare module TypeScript {
         private resolveVariableDeclaration(varDecl, context, enclosingDecl?);
         private resolveTypeParameterDeclaration(typeParameterAST, context);
         private resolveFunctionBodyReturnTypes(funcDeclAST, signature, useContextualType, enclosingDecl, context);
+        private typeCheckFunctionDeclaration(funcDeclAST, funcDecl, signature, context);
         private resolveFunctionDeclaration(funcDeclAST, context);
         private resolveGetAccessorDeclaration(funcDeclAST, context);
         private resolveSetAccessorDeclaration(funcDeclAST, context);
@@ -8771,7 +8795,7 @@ interface IFileWatcher {
     close(): void;
 }
 interface IIO {
-    readFile(path: string): FileInformation;
+    readFile(path: string, codepage: number): FileInformation;
     writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
     deleteFile(path: string): void;
     dir(path: string, re?: RegExp, options?: {

@@ -49,7 +49,7 @@ module GruntTs{
             settings.noImplicitAny = true;
         }
         if(options.allowbool){
-            settings.allowbool = true;
+            settings.allowBool = true;
         }
         if(options.allowimportmodule){
             settings.allowModuleKeywordInExternalModuleReference = true;
