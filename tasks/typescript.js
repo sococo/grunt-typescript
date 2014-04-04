@@ -979,8 +979,14 @@ module.exports = function (grunt) {
         }
     };
 
+    // Used to avoid reloading the "typescript.js" file each time a compilation task processed.  Saves a
+    // considerable amount of time when there are multiple tasks.
+    var cacheBinPath;
+
     grunt.registerMultiTask('typescript', 'Compile TypeScript files', function () {
-        var self = this, typescriptBinPath = getTsBinPathWithLoad(), promises = [], done = self.async();
+        var self = this, typescriptBinPath = cacheBinPath || getTsBinPathWithLoad(), promises = [], done = self.async();
+        cacheBinPath = typescriptBinPath;
+
         self.files.forEach(function (gruntFile) {
             var io = new GruntTs.GruntIO(grunt), opts = new GruntTs.Opts(self.options({}), grunt, gruntFile, io);
 
